@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111110">
+  <title>Admin — KLASSIKROOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#111110;--color-background:#111110;--panel:#191918;--line:#ffffff1c;--muted:#aaa9a2;--white:#f4f2ec;--gold:#c6a875}
+    *{box-sizing:border-box}html{scrollbar-gutter:stable}body{margin:0;background:var(--color-background);color:var(--white);font:14px "DM Sans",sans-serif}a{color:inherit;text-decoration:none}
+    button,input,textarea,select{font:inherit;color:inherit}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    header{border-bottom:1px solid var(--line);padding:22px 0}.nav,.row,.tabs,.item{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{font:800 19px Manrope;letter-spacing:.13em}.brand i{font-style:normal;color:var(--gold)}.eyebrow{color:var(--gold);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+    main{padding:42px 0 80px}.intro{margin-bottom:28px}.intro h1{font:500 clamp(38px,6vw,58px)/1 Manrope;letter-spacing:-.06em;margin:12px 0}.intro p,.hint{color:var(--muted);font-size:12px;line-height:1.7}
+    .tabs{justify-content:flex-start;border-bottom:1px solid var(--line);margin:28px 0}.tab{border:0;border-bottom:2px solid transparent;background:none;padding:13px 15px;color:var(--muted);cursor:pointer}.tab.active{border-color:var(--gold);color:var(--gold)}
+    .panel{display:none}.panel.active{display:block}.box{background:var(--panel);border:1px solid var(--line);padding:24px;margin-bottom:18px}.box h2{font:600 19px Manrope;margin:0 0 18px}
+    [hidden]{display:none!important}
+    .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:10px;color:#c9c8c2;text-transform:uppercase;letter-spacing:.1em}
+    input,textarea,select{width:100%;border:1px solid var(--line);background:#121211;padding:12px;outline:none}input:focus,textarea:focus,select:focus{border-color:var(--gold)}textarea{min-height:96px;resize:vertical}
+    .button{border:1px solid var(--gold);background:transparent;padding:12px 16px;color:var(--white);font-size:10px;text-transform:uppercase;letter-spacing:.1em;cursor:pointer}.button.primary{background:var(--gold);color:#171614}.button.danger{border-color:#9b5b54;color:#e3a79f}
+    .row{justify-content:flex-start;margin-top:18px;flex-wrap:wrap}.notice{min-height:20px;margin-top:12px;color:var(--gold);font-size:12px}.list{display:grid;gap:10px}.item{background:#121211;border:1px solid var(--line);padding:12px 14px}.item strong{font:600 14px Manrope}.item small{display:block;color:var(--muted);margin-top:5px;font-size:11px}.item-actions{display:flex;gap:8px}.item-actions button{padding:8px 10px}
+    .badge{color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.status{border:1px solid var(--line);padding:6px 9px;font-size:9px;text-transform:uppercase}
+    .image-preview{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:11px}.image-preview img{width:128px;height:86px;object-fit:cover;border:1px solid var(--line);background:#121211}.image-preview img[hidden]{display:none}
+    @media(max-width:650px){.wrap{width:calc(100% - 28px)}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.box{padding:18px}.item{align-items:flex-start;flex-direction:column}.item-actions{width:100%}.item-actions button{flex:1}.tabs{gap:0}.tab{padding:12px 9px;font-size:11px}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap nav"><a class="brand" href="https://klassickproduction.onrender.com/">KLASSIKROOM<i>.</i></a><a class="button" href="https://klassickproduction.onrender.com/">View site ↗</a></div></header>
+  <main class="wrap">
+    <div class="intro"><div class="eyebrow">Site management</div><h1>Admin studio.</h1><p>Update your homepage, set beat prices in Nigerian naira, manage availability, and publish music releases. Changes are saved on the server and shared with site visitors.</p></div>
+    <form class="box" id="admin-login">
+      <h2>Admin sign in</h2>
+      <p class="hint">Enter the admin password configured in Backend/.env.</p>
+      <div class="field"><label for="admin-password">Admin password</label><input id="admin-password" type="password" autocomplete="current-password" required></div>
+      <div class="row"><button class="button primary" id="admin-login-button" type="submit">Sign in</button></div>
+      <div class="notice" id="admin-login-notice" role="status" aria-live="polite"></div>
+    </form>
+    <nav class="tabs" aria-label="Admin sections" hidden><button class="tab active" data-panel="hero">Homepage</button><button class="tab" data-panel="beats">Beats <span id="beat-count"></span></button><button class="tab" data-panel="music">Music <span id="music-count"></span></button></nav>
+    <section class="panel active" id="hero-panel" hidden>
+      <form class="box" id="hero-form">
+        <h2>Hero content & appearance</h2>
+        <div class="fields">
+          <div class="field"><label for="hero-eyebrow">Eyebrow</label><input id="hero-eyebrow" required></div>
+          <div class="field"><label for="hero-note">Small note</label><input id="hero-note" required></div>
+          <div class="field"><label for="hero-title">Headline first line</label><input id="hero-title" required></div>
+          <div class="field"><label for="hero-italic">Headline second line</label><input id="hero-italic" required></div>
+          <div class="field full"><label for="hero-description">Description</label><textarea id="hero-description" required></textarea></div>
+          <div class="field"><label for="hero-location">Location label</label><input id="hero-location" required></div>
+          <div class="field"><label for="hero-font">Headline font</label><select id="hero-font"><option>Manrope</option><option>DM Sans</option><option>Georgia</option><option>Arial</option></select></div>
+          <div class="field full"><label for="hero-image">Hero image</label><input id="hero-image" type="file" accept="image/*"><div class="image-preview"><img id="hero-image-preview" alt="Homepage hero preview" hidden><span id="hero-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
+        </div>
+        <div class="row"><button class="button primary" type="submit">Save homepage</button><a class="button" href="../index.html">Preview site</a></div><div class="notice" id="hero-notice" role="status"></div>
+      </form>
+    </section>
+    <section class="panel" id="beats-panel" hidden>
+      <form class="box" id="beat-form">
+        <h2 id="beat-form-title">Add a beat</h2><input id="beat-id" type="hidden">
+        <div class="fields">
+          <div class="field"><label for="beat-title">Beat name</label><input id="beat-title" required></div><div class="field"><label for="beat-genre">Genre</label><input id="beat-genre" required placeholder="Afrobeats, R&B…"></div>
+          <div class="field"><label for="beat-mood">Mood</label><input id="beat-mood" placeholder="Dreamy, energetic…"></div><div class="field"><label for="beat-bpm">BPM</label><input id="beat-bpm" type="number" min="1" max="400" required></div>
+          <div class="field"><label for="beat-duration">Duration</label><input id="beat-duration" placeholder="02:48"></div><div class="field"><label for="beat-stock">Availability</label><select id="beat-stock"><option value="available">Available</option><option value="sold">Sold out</option></select></div>
+          <div class="field"><label for="beat-price">Price (NGN ₦)</label><input id="beat-price" type="number" min="0.01" step="0.01" placeholder="e.g. 25000"><span class="hint">Required for available beats. Enter the amount in Nigerian naira.</span></div>
+          <div class="field full"><label for="beat-image">Beat artwork</label><input id="beat-image" type="file" accept="image/*"><div class="image-preview"><img id="beat-image-preview" alt="Beat artwork preview" hidden><span id="beat-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
+          <div class="field full"><label for="beat-audio">Audio preview URL</label><input id="beat-audio" type="url" placeholder="https://…"></div>
+          <div class="field full"><label for="beat-description">Description</label><textarea id="beat-description" placeholder="Optional beat details"></textarea></div>
+        </div>
+        <div class="row"><button class="button primary" type="submit">Save beat</button><button class="button" type="button" id="beat-cancel" hidden>Cancel edit</button></div><div class="notice" id="beat-notice" role="status"></div>
+      </form>
+      <div class="box"><h2>Beat catalog</h2><div class="list" id="beat-list"></div></div>
+    </section>
+    <section class="panel" id="music-panel" hidden>
+      <form class="box" id="music-form">
+        <h2 id="music-form-title">Add music</h2><input id="music-id" type="hidden">
+        <div class="fields">
+          <div class="field"><label for="music-title">Track name</label><input id="music-title" required></div><div class="field"><label for="music-genre">Genre</label><input id="music-genre" required></div>
+          <div class="field"><label for="music-year">Year</label><input id="music-year" type="number" min="1900" max="2200" required></div><div class="field"><label for="music-duration">Duration</label><input id="music-duration" placeholder="03:10"></div>
+          <div class="field"><label for="music-bpm">BPM</label><input id="music-bpm" type="number" min="1" max="400"></div><div class="field"><label for="music-type">Release type</label><input id="music-type" placeholder="Single, EP…"></div>
+          <div class="field full"><label for="music-image">Release artwork</label><input id="music-image" type="file" accept="image/*"><div class="image-preview"><img id="music-image-preview" alt="Release artwork preview" hidden><span id="music-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
+          <div class="field full"><label for="music-audio">Audio URL</label><input id="music-audio" type="url" placeholder="https://…"></div>
+          <div class="field full"><label for="music-description">Description</label><textarea id="music-description" placeholder="Release details"></textarea></div>
+        </div>
+        <div class="row"><button class="button primary" type="submit">Save music</button><button class="button" type="button" id="music-cancel" hidden>Cancel edit</button></div><div class="notice" id="music-notice" role="status"></div>
+      </form>
+      <div class="box"><h2>Music catalog</h2><div class="list" id="music-list"></div></div>
+    </section>
+    <div class="row" id="admin-actions" hidden><button class="button danger" id="reset-data" type="button">Restore original starter content</button><button class="button" id="admin-logout" type="button">Sign out</button></div><div class="notice" id="global-notice" role="status"></div>
+  </main>
+  <script src="https://klassickproduction.onrender.com/site-data.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    const getBeats = () => SiteData.getBeats();
+    const getMusic = () => SiteData.getMusic();
+    const pendingImages = { hero: "", beat: "", music: "" };
+    const currentImages = { hero: "", beat: "", music: "" };
+    function showNotice(id, message) { $(id).textContent = message; }
+    async function safelySave(action, notice) {
+      try {
+        action();
+        await SiteData.sync();
+        showNotice(notice, "Saved on the server. The public pages will show the update.");
+      } catch (error) {
+        showNotice(notice, "Could not publish changes: " + error.message);
+      }
+      renderLists();
+    }
+    function showImage(type, value) {
+      const source = SiteData.assetURL(value);
+      const image = $(type + "-image-preview");
+      image.hidden = !source;
+      image.removeAttribute("src");
+      if (source) image.src = source;
+      $(type + "-image-empty").hidden = Boolean(source);
+    }
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) { reject(new Error("Choose an image file.")); return; }
+        if (file.size > 12 * 1024 * 1024) { reject(new Error("Choose an image smaller than 12 MB.")); return; }
+        const objectURL = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(objectURL);
+          try {
+            const canvas = document.createElement("canvas");
+            let scale = Math.min(1, 1600 / Math.max(image.naturalWidth, image.naturalHeight));
+            let result = "";
+            for (let attempt = 0; attempt < 8; attempt++) {
+              canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+              canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+              const context = canvas.getContext("2d");
+              if (!context) throw new Error("Image processing is not available in this browser.");
+              context.drawImage(image, 0, 0, canvas.width, canvas.height);
+              result = canvas.toDataURL("image/webp", 0.8);
+              if (!result.startsWith("data:image/webp")) result = canvas.toDataURL("image/jpeg", 0.8);
+              if (result.length <= 480 * 1024) { resolve(result); return; }
+              scale *= 0.82;
+            }
+            reject(new Error("This image could not be compressed enough. Try a smaller image."));
+          } catch (error) {
+            reject(error);
+          }
+        };
+        image.onerror = () => { URL.revokeObjectURL(objectURL); reject(new Error("The selected file could not be read as an image.")); };
+        image.src = objectURL;
+      });
+    }
+    ["hero", "beat", "music"].forEach(type => {
+      $(type + "-image").addEventListener("change", async event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        showNotice(type + "-notice", "Preparing image…");
+        try {
+          pendingImages[type] = await compressImage(file);
+          showImage(type, pendingImages[type]);
+          showNotice(type + "-notice", "Image ready. Save to publish it.");
+        } catch (error) {
+          event.target.value = "";
+          showNotice(type + "-notice", error.message);
+        }
+      });
+    });
+    function renderHero() {
+      const hero = SiteData.getHero();
+      [["hero-eyebrow","eyebrow"],["hero-title","title"],["hero-italic","italic"],["hero-description","description"],["hero-note","note"],["hero-location","location"],["hero-font","font"]].forEach(([field,key]) => $(field).value = hero[key] || "");
+      currentImages.hero = hero.image || "";
+      pendingImages.hero = "";
+      $("hero-image").value = "";
+      showImage("hero", currentImages.hero);
+    }
+    function resetForm(type) {
+      const form = $(type + "-form");
+      form.reset(); $(type + "-id").value = "";
+      currentImages[type] = "";
+      pendingImages[type] = "";
+      showImage(type, "");
+      $(type + "-form-title").textContent = type === "beat" ? "Add a beat" : "Add music";
+      $(type + "-cancel").hidden = true;
+    }
+    function editItem(type, item) {
+      Object.keys(item).forEach(key => { const field = $(type + "-" + key); if (field && field.type !== "file") field.value = item[key] ?? ""; });
+      currentImages[type] = item.image || "";
+      pendingImages[type] = "";
+      $(type + "-image").value = "";
+      showImage(type, currentImages[type]);
+      $(type + "-id").value = item.id;
+      $(type + "-form-title").textContent = type === "beat" ? "Edit beat" : "Edit music";
+      $(type + "-cancel").hidden = false;
+      $(type + "-form").scrollIntoView({ behavior: "smooth" });
+    }
+    function renderLists() {
+      const beats = getBeats(), music = getMusic();
+      $("beat-count").textContent = "(" + beats.length + ")";
+      $("music-count").textContent = "(" + music.length + ")";
+      $("beat-list").innerHTML = beats.map(item => `<div class="item"><div><strong>${esc(item.title)}</strong><small>${esc(item.genre)} · ${esc(item.bpm)} BPM · ${esc(item.id)} · ${item.price > 0 ? new Intl.NumberFormat("en-NG", { style:"currency", currency:"NGN", maximumFractionDigits:2 }).format(item.price) : "Price not set"}</small></div><div class="item-actions"><span class="status">${item.stock === "sold" ? "Sold out" : "Available"}</span><button class="button" data-edit-beat="${esc(item.id)}" type="button">Edit</button><button class="button danger" data-delete-beat="${esc(item.id)}" type="button">Delete</button></div></div>`).join("") || '<p class="hint">No beats yet. Add your first beat above.</p>';
+      $("music-list").innerHTML = music.map(item => `<div class="item"><div><strong>${esc(item.title)}</strong><small>${esc(item.genre)} · ${esc(item.year)} · ${esc(item.id)}</small></div><div class="item-actions"><button class="button" data-edit-music="${esc(item.id)}" type="button">Edit</button><button class="button danger" data-delete-music="${esc(item.id)}" type="button">Delete</button></div></div>`).join("") || '<p class="hint">No music yet. Add your first release above.</p>';
+      $("beat-list").querySelectorAll("[data-edit-beat]").forEach(button => button.onclick = () => editItem("beat", beats.find(item => item.id === button.dataset.editBeat)));
+      $("music-list").querySelectorAll("[data-edit-music]").forEach(button => button.onclick = () => editItem("music", music.find(item => item.id === button.dataset.editMusic)));
+      $("beat-list").querySelectorAll("[data-delete-beat]").forEach(button => button.onclick = () => { if (confirm("Delete this beat?")) safelySave(() => SiteData.saveBeats(getBeats().filter(item => item.id !== button.dataset.deleteBeat)), "beat-notice"); });
+      $("music-list").querySelectorAll("[data-delete-music]").forEach(button => button.onclick = () => { if (confirm("Delete this release?")) safelySave(() => SiteData.saveMusic(getMusic().filter(item => item.id !== button.dataset.deleteMusic)), "music-notice"); });
+    }
+    document.querySelectorAll(".tab").forEach(button => button.onclick = () => {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab === button));
+      document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === button.dataset.panel + "-panel"));
+    });
+    $("hero-form").onsubmit = async event => {
+      event.preventDefault();
+      const image = pendingImages.hero || currentImages.hero;
+      if (!image) { showNotice("hero-notice", "Choose a hero image before saving."); return; }
+      const hero = { eyebrow:$("hero-eyebrow").value.trim(), title:$("hero-title").value.trim(), italic:$("hero-italic").value.trim(), description:$("hero-description").value.trim(), note:$("hero-note").value.trim(), location:$("hero-location").value.trim(), image, font:$("hero-font").value };
+      await safelySave(() => SiteData.saveHero(hero), "hero-notice");
+    };
+    ["beat","music"].forEach(type => {
+      $(type + "-form").onsubmit = async event => {
+        event.preventDefault();
+        const id = $(type + "-id").value || ((type === "beat" ? "BT-" : "MU-") + Date.now());
+        const current = type === "beat" ? getBeats() : getMusic();
+        const existing = current.find(item => item.id === id);
+        const image = pendingImages[type] || currentImages[type] || existing?.image || "";
+        if (!image) { showNotice(type + "-notice", "Choose artwork before saving."); return; }
+        const price = Number($("beat-price").value);
+        if (type === "beat" && $("beat-stock").value === "available" &&
+            (!Number.isFinite(price) || price <= 0)) {
+          showNotice("beat-notice", "Enter a price greater than ₦0 for an available beat.");
+          $("beat-price").focus();
+          return;
+        }
+        const item = type === "beat"
+          ? { id, title:$("beat-title").value.trim(), genre:$("beat-genre").value.trim(), mood:$("beat-mood").value.trim(), bpm:Number($("beat-bpm").value), duration:$("beat-duration").value.trim(), stock:$("beat-stock").value, price:Number.isFinite(price) && price > 0 ? price : null, currency:"NGN", image, audio:$("beat-audio").value.trim(), description:$("beat-description").value.trim() }
+          : { id, title:$("music-title").value.trim(), genre:$("music-genre").value.trim(), year:Number($("music-year").value), duration:$("music-duration").value.trim(), bpm:Number($("music-bpm").value) || "", type:$("music-type").value.trim(), image, audio:$("music-audio").value.trim(), description:$("music-description").value.trim() };
+        await safelySave(() => {
+          const updated = current.some(existing => existing.id === id) ? current.map(existing => existing.id === id ? item : existing) : [item, ...current];
+          if (type === "beat") SiteData.saveBeats(updated); else SiteData.saveMusic(updated);
+          resetForm(type);
+        }, type + "-notice");
+      };
+      $(type + "-cancel").onclick = () => resetForm(type);
+    });
+    $("reset-data").onclick = async () => {
+      if (!confirm("Restore all original starter content? This removes your saved edits.")) return;
+      await safelySave(() => { SiteData.reset(); resetForm("beat"); resetForm("music"); renderHero(); }, "global-notice");
+    };
+    function showEditor() {
+      $("admin-login").hidden = true;
+      document.querySelector(".tabs").hidden = false;
+      document.querySelectorAll(".panel").forEach(panel => panel.hidden = false);
+      $("admin-actions").hidden = false;
+      $("global-notice").hidden = false;
+      renderHero();
+      renderLists();
+    }
+    $("admin-login").onsubmit = async event => {
+      event.preventDefault();
+      const button = $("admin-login-button");
+      const notice = $("admin-login-notice");
+      button.disabled = true;
+      notice.textContent = "Signing in…";
+      try {
+        await SiteData.login($("admin-password").value);
+        await SiteData.ready;
+        showEditor();
+      } catch (error) {
+        notice.textContent = error.message || "Unable to sign in.";
+      } finally {
+        button.disabled = false;
+      }
+    };
+    $("admin-logout").onclick = async () => {
+      try {
+        await SiteData.logout();
+        window.location.reload();
+      } catch (error) {
+        showNotice("global-notice", "Could not sign out: " + error.message);
+      }
+    };
+    SiteData.ready.then(() => SiteData.checkAdminSession())
+      .then(({ authenticated, adminConfigured }) => {
+        if (authenticated) showEditor();
+        else if (!adminConfigured) $("admin-login-notice").textContent = "Set ADMIN_PASSWORD in Backend/.env (at least 12 characters), then restart the API.";
+      })
+      .catch(error => {
+        $("admin-login-notice").textContent = "Could not connect to the content server: " + error.message;
+      });
+  </script>
+</body>
+</html>
