@@ -51,7 +51,7 @@
           <div class="field"><label for="hero-font">Headline font</label><select id="hero-font"><option>Manrope</option><option>DM Sans</option><option>Georgia</option><option>Arial</option></select></div>
           <div class="field full"><label for="hero-image">Hero image</label><input id="hero-image" type="file" accept="image/*"><div class="image-preview"><img id="hero-image-preview" alt="Homepage hero preview" hidden><span id="hero-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
         </div>
-        <div class="row"><button class="button primary" type="submit">Save homepage</button><a class="button" href="../index.html">Preview site</a></div><div class="notice" id="hero-notice" role="status"></div>
+        <div class="row"><button class="button primary" type="submit">Save homepage</button><a class="button" href="https://klassickproduction.onrender.com/">Preview site</a></div><div class="notice" id="hero-notice" role="status"></div>
       </form>
     </section>
     <section class="panel" id="beats-panel" hidden>
@@ -63,7 +63,7 @@
           <div class="field"><label for="beat-duration">Duration</label><input id="beat-duration" placeholder="02:48"></div><div class="field"><label for="beat-stock">Availability</label><select id="beat-stock"><option value="available">Available</option><option value="sold">Sold out</option></select></div>
           <div class="field"><label for="beat-price">Price (NGN ₦)</label><input id="beat-price" type="number" min="0.01" step="0.01" placeholder="e.g. 25000"><span class="hint">Required for available beats. Enter the amount in Nigerian naira.</span></div>
           <div class="field full"><label for="beat-image">Beat artwork</label><input id="beat-image" type="file" accept="image/*"><div class="image-preview"><img id="beat-image-preview" alt="Beat artwork preview" hidden><span id="beat-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
-          <div class="field full"><label for="beat-audio">Audio preview URL</label><input id="beat-audio" type="url" placeholder="https://…"></div>
+          <div class="field full"><label for="beat-audio">Audio preview file</label><input id="beat-audio" type="file" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.webm"><span class="hint" id="beat-audio-status">Optional. Upload MP3, WAV, FLAC, M4A, AAC, OGG, or WebM, up to 100 MB.</span></div>
           <div class="field full"><label for="beat-description">Description</label><textarea id="beat-description" placeholder="Optional beat details"></textarea></div>
         </div>
         <div class="row"><button class="button primary" type="submit">Save beat</button><button class="button" type="button" id="beat-cancel" hidden>Cancel edit</button></div><div class="notice" id="beat-notice" role="status"></div>
@@ -78,7 +78,7 @@
           <div class="field"><label for="music-year">Year</label><input id="music-year" type="number" min="1900" max="2200" required></div><div class="field"><label for="music-duration">Duration</label><input id="music-duration" placeholder="03:10"></div>
           <div class="field"><label for="music-bpm">BPM</label><input id="music-bpm" type="number" min="1" max="400"></div><div class="field"><label for="music-type">Release type</label><input id="music-type" placeholder="Single, EP…"></div>
           <div class="field full"><label for="music-image">Release artwork</label><input id="music-image" type="file" accept="image/*"><div class="image-preview"><img id="music-image-preview" alt="Release artwork preview" hidden><span id="music-image-empty">Choose an image from your device.</span></div><span class="hint">Images are resized before publishing to the server. Use JPG, PNG, or WebP images up to 12 MB.</span></div>
-          <div class="field full"><label for="music-audio">Audio URL</label><input id="music-audio" type="url" placeholder="https://…"></div>
+          <div class="field full"><label for="music-audio">Audio file</label><input id="music-audio" type="file" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.webm"><span class="hint" id="music-audio-status">Optional. Upload MP3, WAV, FLAC, M4A, AAC, OGG, or WebM, up to 100 MB.</span></div>
           <div class="field full"><label for="music-description">Description</label><textarea id="music-description" placeholder="Release details"></textarea></div>
         </div>
         <div class="row"><button class="button primary" type="submit">Save music</button><button class="button" type="button" id="music-cancel" hidden>Cancel edit</button></div><div class="notice" id="music-notice" role="status"></div>
@@ -95,6 +95,7 @@
     const getMusic = () => SiteData.getMusic();
     const pendingImages = { hero: "", beat: "", music: "" };
     const currentImages = { hero: "", beat: "", music: "" };
+    const currentAudio = { beat: "", music: "" };
     function showNotice(id, message) { $(id).textContent = message; }
     async function safelySave(action, notice) {
       try {
@@ -113,6 +114,22 @@
       image.removeAttribute("src");
       if (source) image.src = source;
       $(type + "-image-empty").hidden = Boolean(source);
+    }
+    function showAudio(type, value) {
+      const status = $(type + "-audio-status");
+      status.replaceChildren();
+      if (!value) {
+        status.textContent = "Optional. Upload MP3, WAV, FLAC, M4A, AAC, OGG, or WebM, up to 100 MB.";
+        return;
+      }
+      const label = document.createElement("span");
+      label.textContent = "Audio uploaded. ";
+      const preview = document.createElement("a");
+      preview.href = SiteData.assetURL(value);
+      preview.target = "_blank";
+      preview.rel = "noopener noreferrer";
+      preview.textContent = "Preview current audio";
+      status.append(label, preview, document.createTextNode(". Choose a new file to replace it."));
     }
     function compressImage(file) {
       return new Promise((resolve, reject) => {
@@ -175,6 +192,10 @@
       currentImages[type] = "";
       pendingImages[type] = "";
       showImage(type, "");
+      if (type === "beat" || type === "music") {
+        currentAudio[type] = "";
+        showAudio(type, "");
+      }
       $(type + "-form-title").textContent = type === "beat" ? "Add a beat" : "Add music";
       $(type + "-cancel").hidden = true;
     }
@@ -184,6 +205,11 @@
       pendingImages[type] = "";
       $(type + "-image").value = "";
       showImage(type, currentImages[type]);
+      if (type === "beat" || type === "music") {
+        currentAudio[type] = item.audio || "";
+        $(type + "-audio").value = "";
+        showAudio(type, currentAudio[type]);
+      }
       $(type + "-id").value = item.id;
       $(type + "-form-title").textContent = type === "beat" ? "Edit beat" : "Edit music";
       $(type + "-cancel").hidden = false;
@@ -226,14 +252,28 @@
           $("beat-price").focus();
           return;
         }
-        const item = type === "beat"
-          ? { id, title:$("beat-title").value.trim(), genre:$("beat-genre").value.trim(), mood:$("beat-mood").value.trim(), bpm:Number($("beat-bpm").value), duration:$("beat-duration").value.trim(), stock:$("beat-stock").value, price:Number.isFinite(price) && price > 0 ? price : null, currency:"NGN", image, audio:$("beat-audio").value.trim(), description:$("beat-description").value.trim() }
-          : { id, title:$("music-title").value.trim(), genre:$("music-genre").value.trim(), year:Number($("music-year").value), duration:$("music-duration").value.trim(), bpm:Number($("music-bpm").value) || "", type:$("music-type").value.trim(), image, audio:$("music-audio").value.trim(), description:$("music-description").value.trim() };
-        await safelySave(() => {
-          const updated = current.some(existing => existing.id === id) ? current.map(existing => existing.id === id ? item : existing) : [item, ...current];
-          if (type === "beat") SiteData.saveBeats(updated); else SiteData.saveMusic(updated);
-          resetForm(type);
-        }, type + "-notice");
+        const submitButton = $(type + "-form").querySelector('[type="submit"]');
+        submitButton.disabled = true;
+        try {
+          const audioFile = $(type + "-audio").files[0];
+          let audio = currentAudio[type];
+          if (audioFile) {
+            showNotice(type + "-notice", "Uploading audio file…");
+            audio = await SiteData.uploadAudio(audioFile);
+          }
+          const item = type === "beat"
+            ? { id, title:$("beat-title").value.trim(), genre:$("beat-genre").value.trim(), mood:$("beat-mood").value.trim(), bpm:Number($("beat-bpm").value), duration:$("beat-duration").value.trim(), stock:$("beat-stock").value, price:Number.isFinite(price) && price > 0 ? price : null, currency:"NGN", image, audio, description:$("beat-description").value.trim() }
+            : { id, title:$("music-title").value.trim(), genre:$("music-genre").value.trim(), year:Number($("music-year").value), duration:$("music-duration").value.trim(), bpm:Number($("music-bpm").value) || "", type:$("music-type").value.trim(), image, audio, description:$("music-description").value.trim() };
+          await safelySave(() => {
+            const updated = current.some(existing => existing.id === id) ? current.map(existing => existing.id === id ? item : existing) : [item, ...current];
+            if (type === "beat") SiteData.saveBeats(updated); else SiteData.saveMusic(updated);
+            resetForm(type);
+          }, type + "-notice");
+        } catch (error) {
+          showNotice(type + "-notice", "Could not upload audio: " + error.message);
+        } finally {
+          submitButton.disabled = false;
+        }
       };
       $(type + "-cancel").onclick = () => resetForm(type);
     });
